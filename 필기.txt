@@ -1,272 +1,361 @@
-App.js
-import React, { Component } from 'react';
-import Movie from './components/Movie';
-import InputComp from './components/InputComp';
-import './App.css'
+https://itpro.tistory.com/100
+yarn start안될때 보안오류의 경우 
 
-class App extends Component {
+
+https://phant0m.tistory.com/34 drum kit 해석 
+
+
+https://cheonmro.github.io/2018/09/04/event-object/ 
+https://blog.sonim1.com/152
+이벤트 객체
+
+
+페이지네이션
+
+1. post 개별 리스트 자료를 나타낸 목록
+
+2. posts 포스트들을 mapping 시키는 js
+
+3. 전체 동작을 나타내는 페이지네이션.. 
+
+4. 메인에서 데이터로 사용할 배열 생성 
+
+5. postList 컴포넌트에서 매핑시키기 키값 주기!
+
+6. 부모요소에서 배열에 있는 프로퍼티값(ex id title author...) 가져오기 at post 컴포넌트 
+
+7. 각 컴포넌트에 대해 css 작업  App, pagiNation, Post, PostList
+
+8. 각 페이지마다 지정된 포스트만 남기기 위해서 postPerPage 프로퍼티를 state에 추가 
+그리고 PagiNation에 totalLength, postsPerPage, currentPage, setCurrentPage 추가 .. 할당할 변수는 
+순서대로 postList.length, postsPerPage, currentPage, setCurrentPage.. 
+
+9. pagiNation에서 길이에 맞춰 하단의 페이지네이션 상자에 번호를 나타내기 위해서 render내부에서 순서대로 번호 삽입..  props를 통해 수치 가져오기.. 
+
+10, 하단 페이지네이션 박스에 클릭이벤트 부여 (setCurrentPage)... this.setCureentPage(data) 함수를 바로 클릭이벤트로 넣어주면 이벤트를 넣었을 때 바로호출이 되어버림.. 현재페이지 설정.. 
+
+11. 메인에서 이제 현재페이지 설정을 위해서 state에 currentPage 추가 및 하단 pageNation 컴포넌트에도 currentPage 설정.. 
+현재 페이지 번호로 설정함.. 
+
+12. PostList 컴포넌트에서 이제 전체 페이지 중 지정된 숫자만큼 끊어서 표시할 수 있도록 slice를 활용한 함수를 생성. 
+
+
+코드 
+App.js
+
+import './App.css';
+import PostList from './components/PostList.js';
+import PagiNation from './components/PagiNation.js';
+import React,{Component} from 'react';
+
+class App extends Component{
   constructor(props){
     super(props)
     this.state={
-      movieList:[
-        {name:'한산:용의 출현',director:'김현민',runningTime:130,rating:8.5},
-        {name:'헌트',director:'이정재',runningTime:125,rating:8.7},
-        {name:'탑건:매버릭',director:'조셉 코신스키',runningTime:130,rating:9.4}
-      ]
+      postList:[
+        {id:10,title:'Post10',author:'이민호',writeDate:'2022-12-20',hits:10},
+        {id:9,title:'Post9',author:'정채연',writeDate:'2022-11-20',hits:10},
+        {id:8,title:'Post8',author:'송중기',writeDate:'2022-10-20',hits:10},
+        {id:7,title:'Post7',author:'안철수',writeDate:'2022-09-20',hits:10},
+        {id:6,title:'Post6',author:'홍준표',writeDate:'2022-08-20',hits:10},
+        {id:5,title:'Post5',author:'문재인',writeDate:'2022-07-20',hits:10},
+        {id:4,title:'Post4',author:'박근혜',writeDate:'2022-06-20',hits:10},
+        {id:3,title:'Post3',author:'윤석열',writeDate:'2022-05-20',hits:10},
+        {id:2,title:'Post2',author:'옥희종',writeDate:'2022-04-20',hits:10},
+        {id:1,title:'Post1',author:'이동준',writeDate:'2022-03-20',hits:10},
+      ],
+      postsPerPage:3,
+      currentPage:1
     }
   }
 
-  addMovieInfo = (name,director,runningTime,rating) => {
-    alert('추가!(App.js)')
-    alert('추가할 영화제목(App.js):' + name)
-    alert('추가할 감독명(App.js):' + director)
-    alert('추가할 상영시간(App.js):' + runningTime)
-    alert('추가할 평점(App.js):' + rating)
-    const movieObj = {name:name,director:director,runningTime:runningTime,rating:rating}
+  setCurrentPage=(page)=>{
+    alert('App의 페이지번호 설정 함수 실행!')
+    alert(page+"로 페이지 변경!")
     this.setState({
-      movieList:this.state.movieList.concat(movieObj)
+      currentPage:page
     })
   }
 
-  deleteMovie = (name,director,rating,runningTime) => { // 자식 컴포넌트에서는 this.props~로 넘겨준 요소를 넣어주면됨..
-    alert('삭제! (App.js)')
-    alert('삭제할 영화제목:'+name) //이 때 부모요소에서 불러옴
-    const filteredList = this.state.movieList.filter(
-      (data) => ((data.name !== name) && (data.runningTime 
-        !== runningTime) && (data.rating !== rating) && 
-        (data.director !== director)  )
-    )
-    this.setState({
-      movieList : filteredList
-    })
+  currentPosts=(totalPosts)=>{
+    const indexOfFirst=(this.state.currentPage-1)*this.state.postsPerPage
+    const indexOfLast=indexOfFirst+this.state.postsPerPage
+    const slicePosts=totalPosts.slice(indexOfFirst,indexOfLast)
+    //indexOfFirst부터 ~ indexOfLast까지 배열 일부분 추출
+    //totalPosts.slice(0,3)-1페이지 클릭시
+    //totalPosts배열 0번째부터 3번째 미만까지...
+    //배열 0,1,2번째 원소만 추출해서 리턴
+    //배열 0~2번째 부분만 추출해서 리턴
+
+    //totalPosts.slice(3,6)-2페이지 클릭시
+    //배열 3~5번째 부분만 추출해서 리턴
+
+    //totalPosts.slice(6,9)-3페이지 클릭시
+    //배열 6~8번째 부분만 추출해서 리턴
+    return slicePosts;
   }
 
-  updateMovie = (name,runningTime) => {
-    alert('수정! (App.js)')
-    alert('수정할 영화 제목:'+name)
-    alert('수정할 상영 시간:'+runningTime)
-    const updateMovieList = this.state.movieList.map(
-      (data) => (data.name === name) ? ({...data, runningTime:runningTime}):data
-    )
-    this.setState({
-      movieList:updateMovieList
-    })
-  }
-
-  render() {
-    const result = this.state.movieList.map(
-      (data) => (<Movie key={data.name + `${data.name}`} name={data.name} director={data.director} runningTime={data.runningTime} rating={data.rating}
-      deleteMovie={this.deleteMovie}
-      updateMovie={this.updateMovie}/>)
-    )
-    return (
-      <div id='App'>   
-        <InputComp addMovieInfo={this.addMovieInfo}/> 
-        {result}
+  render(){
+    return(
+      <div id='App'>
+        <PostList postList={this.currentPosts(this.state.postList)}></PostList>
+        <PagiNation totalLength={this.state.postList.length}
+        postsPerPage={this.state.postsPerPage}
+        currentPage={this.state.currentPage}
+        setCurrentPage={this.setCurrentPage}></PagiNation>
       </div>
-    );
+    )
   }
 }
-
 export default App;
-Movie.js
-import React, { Component } from 'react';
-import '../css/Movie.css'
-
-class Movie extends Component {
-    constructor(props){
-        super(props)
-        this.state={
-            edit:false,
-            runningTime:this.props.runningTime,
-            director:this.props.director,
-            name:this.props.name,
-            rating:this.props.rating
-        }
-    }
-
-    deleteMovie = () => {
-        alert('삭제! (Moive.js)')
-        alert('삭제할 영화제목:'+this.props.name) //이 때 부모요소에서 불러옴
-        this.props.deleteMovie(this.props.name,this.props.director,this.props.rating,this.props.runningTime)
-    }
-
-    updateMovie = () => {
-        alert('수정! (Movie.js)')
-        const {edit,runningTime}=this.state
-        const {name} = this.props
-        if(edit === true){
-            this.props.updateMovie(name,runningTime)
-        }
-        this.setState({
-            edit:!this.state.edit
-        })
-    }
-
-    runningTimeChange = (e) => {
-        console.log(e.target.value)
-        this.setState({
-            runningTime:e.target.value
-        })
-    }
-
-    render() {
-        const {edit} = this.state
-        if(edit===false){
-            return (
-                <div id='wrap1'>
-                    <div>
-                        제목:{this.props.name}
-                    </div>
-                    <div>
-                        감독:{this.props.director}
-                    </div>
-                    <div>
-                        시간:{this.props.runningTime}
-                    </div>
-                    <div>
-                        평점:{this.props.rating}
-                    </div>
-                    <button onClick={this.updateMovie}>수정</button>
-                    <button onClick={this.deleteMovie}>삭제</button>
-                </div>
-            );
-        }
-        else{
-            return (
-                <div id='wrap1'>
-                    <div>
-                        제목:{this.props.name}
-                    </div>
-                    <div>
-                        감독:{this.props.director}
-                    </div>
-                    <div>
-                        시간:<input type='text' defaultValue={this.props.runningTime} 
-                        onChange={this.runningTimeChange}/>
-                    </div>
-                    <div>
-                        평점:{this.props.rating}
-                    </div>
-                    <button onClick={this.updateMovie}>수정</button>
-                    <button onClick={this.deleteMovie}>삭제</button>
-                </div>
-            );
-        }
-    }
-}
-
-export default Movie;
-
-Movie.css
-#wrap1{
-    width: 1000px;
-    height: 140px;
-    background-color: rgb(72, 139, 117);
-    margin-top: 10px;
-}
 
 
-InputComp.js
-import React, { Component } from 'react';
-import '../css/InputComp.css'
+App.css
 
-class InputComp extends Component {
-    constructor(props){
-        super(props)
-        this.state={
-            name:'',
-            director:'',
-            runningTime:'',
-            rating:''
-        }
-    }
-
-    addMovieInfo = () => {
-        alert('추가!(addMovieInfo.js)')
-        const {name,director,runningTime,rating} = this.state
-        alert('추가할 영화제목(addMovieInfo.js):' + name)
-        alert('추가할 감독명(addMovieInfo.js):' + director)
-        alert('추가할 상영시간(addMovieInfo.js):' + runningTime)
-        alert('추가할 평점(addMovieInfo.js):' + rating)
-
-        this.props.addMovieInfo(name,director,runningTime,rating)
-    }
-
-    nameChange = (e) => {
-        console.log(e.target.value)
-        this.setState({
-            name:e.target.value
-        })
-    }
-
-    directorChange = (e) => {
-        this.setState({
-            director:e.target.value
-        })
-    }
-
-    runningTimeChange = (e) => {
-        this.setState({
-            runningTime:e.target.value
-        })
-    }
-    ratingChange = (e) => {
-        this.setState({
-            rating:e.target.value
-        })
-    }
-    render() {
-        return (
-            <div id='wrap2'>
-                <input type="text" onChange={this.nameChange} placeholder='영화제목'/>
-                <input type="text" onChange={this.directorChange} placeholder='감독'/>
-                <input type="text" onChange={this.runningTimeChange} placeholder='러닝타임'/>
-                <input type="text" onChange={this.ratingChange} placeholder='평점'/>
-                <button onClick={this.addMovieInfo}>추가</button>
-            </div>
-        );
-    }
-}
-
-export default InputComp;
-
-InputComp.css
-#wrap2{
-    width: 1000px;
-    height: 100px;
-    background-color: rgb(94, 62, 123);   
-    text-align: center; 
-}
-
-APP.css
-body{
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
 #App{
-  width: 1000px;
-  height: 900px;
-  background-color: rgb(152, 116, 73);
+  width:1000px;
+  height:1000px;
+  background-color: aqua;
+  margin:0 auto;
 }
 
-input{
-    height: 22px;
+PagiNation.js
+
+import React,{Component} from 'react';
+import '../css/PagiNation.css';
+import $ from 'jquery';
+
+class PagiNation extends Component{
+  constructor(props){
+    super(props)
+    this.state={
+    }
+  }
+
+  pageClick=(page)=>{
+    alert("페이지 클릭!:"+page)
+    this.props.setCurrentPage(page)
+
+    //모든 페이지의 하이라이트 비활성화
+    //클래스이름이 모든 페이지에 공통으로 있으니까
+    //getElementsByClassName("page")
+    //0번째,1번째...
+    var AllPage=document.getElementsByClassName('page');
+    for(var i=0; i<AllPage.length; i++){
+      AllPage[i].style.color='black';
+      AllPage[i].style.backgroundColor='#777';
+    }
+    //특정 페이지를 클릭하면 하이라이트
+    var activePage=document.getElementById('page'+page);
+    activePage.style.color='#777';
+    activePage.style.backgroundColor='black';
+  }
+
+  componentDidMount(){
+    //jquery 의 ready와 유사한 기능
+    //화면 다 만들어지고 나서 실행
+    //여기서 1페이지 활성화 시켜놓는것
+    //var activePage=document.getElementById('page1');
+    //activePage.style.color='#777';
+    //activePage.style.backgroundColor='black';
+    $("#page1").css({
+      color:'#777',
+      backgroundColor:'black'
+    })
+  }
+
+  prevFunc=()=>{
+    alert("이전!")
+    const {currentPage,setCurrentPage}=this.props
+    //비구조화할당, 구조분해할당, destructuring assignment
+    //props의 currentPage를 왼쪽 currentPage에 할당
+    if(currentPage===1){
+      alert("이동불가!")
+      return
+    }
+    const prevPage=currentPage-1
+    setCurrentPage(prevPage)
+  }
+
+  nextFunc=()=>{
+    alert("다음!")
+    const {currentPage,setCurrentPage,totalLength,postsPerPage}=this.props
+    //비구조화할당, 구조분해할당, destructuring assignment
+    const endPage=Math.ceil(totalLength/postsPerPage )//4
+    if(currentPage===endPage){
+      alert("이동불가!")
+      return//함수종료
+    }
+    const nextPage=currentPage+1
+    setCurrentPage(nextPage)
+    //App가 넘겨준 페이지 설정 함수
+    //거기다가 다음페이지 번호를 넘기면
+    //App의 currentPage가 바뀐다.
+  }
+
+  render(){
+
+    let pageNumbers=[];
+    const endPage=Math.ceil(this.props.totalLength/this.props.postsPerPage )
+    //10/3->3.33333 -> Math.ceil(3.3333) -> 4
+    for(let i=1; i<=endPage; i++){
+      pageNumbers.push(i)//[]->[1]->[1,2]->[1,2,3]->[1,2,3,4]
+    }
+    console.log(pageNumbers)//[1,2,3,4]
+
+    //pageNumbers배열이 넘긴 1,2,3,4가 page 들어가고 page를...
+    const pageList=pageNumbers.map(
+      (page,index)=>(<span key={index} 
+        className="page" id={'page'+page} onClick={()=>this.pageClick(page)}>{page}</span>)
+    )
+    //클래스이름은 공통디자인으로 사용하고,id는 구분용도
+
+    return(
+      <div id='pagination'>
+        <a href="#" className='page' onClick={this.prevFunc}>&lt;</a>
+        {pageList}
+        <a href="#" className='page' onClick={this.nextFunc}>&gt;</a>
+        <div>
+          총 갯수:{this.props.totalLength}
+        </div>
+        <div>
+          페이지당 갯수:{this.props.postsPerPage}
+        </div>
+      </div>
+    )
+  }
+}
+export default PagiNation;
+
+
+PagiNation.css
+
+
+#pagination{
+    width:1000px;
+    height:200px;
+    background-color: brown;
 }
 
-button{
-    height: 22px;
+.page{
+    display: inline-block;
+    width:35px;
+    height:35px;
+    border: 1px solid black;
+    background-color: #777;
+    text-align: center;
+    padding-top: 5px;
+    box-sizing: border-box;
+    margin:10px;
+    text-decoration: none;
+    color:black;
+    cursor: pointer;
+}
+
+
+Post.js
+
+import React,{Component} from 'react';
+import '../css/Post.css';
+
+class Post extends Component{
+  constructor(props){
+    super(props)
+    this.state={
+    }
+  }
+  render(){
+    return(
+      <div id='post'>
+        <span>{this.props.id}</span>
+        <span>{this.props.title}</span>
+        <span>{this.props.author}</span>
+        <span>{this.props.writeDate}</span>
+        <span>{this.props.hits}</span> 
+      </div>
+    )
+  }
+}
+export default Post;
+
+
+Post.css
+
+
+#post{
+    width:900px;
+    height:50px;
+    background-color: chartreuse;
+    margin:20px;
+}
+
+#post>span:first-child{
+    float:left;
+    width:50px;
+    height:50px;
+    background-color: darkcyan;
+}
+#post>span:nth-child(2){
+    float:left;
+    width:200px;
+    height:50px;
+    background-color: darkgoldenrod;
+}
+#post>span:nth-child(3){
+    float:left;
+    width:100px;
+    height:50px;
+    background-color: darkgreen;
+}
+#post>span:nth-child(4){
+    float:left;
+    width:100px;
+    height:50px;
+    background-color: darkorange;
+}
+#post>span:nth-child(5){
+    float:left;
+    width:100px;
+    height:50px;
+    background-color: darkorchid;
 }
 
 
 
+PostList.js
 
-inputComp 추가 함수 
-인풋컴포넌트 내부에 해당 기능의 함수 추가 
-해당 버튼 내부에 해당 함수를 온클릭 이벤트로 연결 
-메인 함수에 해당 함수 추가 및 연동
-메인 함수의 렌더 부분에 최종적으로 해당 함수를 ex) addMovieInfo = {this.addMovieInfo} 형식으로 넣어주면 통과 
+import React,{Component} from 'react';
+import '../css/PostList.css';
+import Post from './Post.js';
+
+class PostList extends Component{
+  constructor(props){
+    super(props)
+    this.state={
+    }
+  }
+  render(){
+    const result=this.props.postList.map(
+      (data,index)=>
+      (<Post key={data.id + `${data.author}`} id={data.id} title={data.title}
+      author={data.author} writeDate={data.writeDate} hits={data.hits}
+      />)
+    )
+    return(
+      <div id='postList'>
+        {result}
+      </div>
+    )
+  }
+}
+export default PostList;
+
+
+PostList.css
+
+#postList{
+    width:1000px;
+    height:400px;
+    background-color: aquamarine;
+}
