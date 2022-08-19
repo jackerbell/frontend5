@@ -1,361 +1,304 @@
-https://itpro.tistory.com/100
-yarn start안될때 보안오류의 경우 
+페이지 네이션 작업순서
 
+1. 작업환경 구축(app,post,postlist,pagination)
 
-https://phant0m.tistory.com/34 drum kit 해석 
+2. postlist 컴포넌트에서 map을 통해서 리스트 형성(10개),게시물이 모두 출력되는지 확인.. (css 작성. post,postlist)
 
+3. pagination 컴포넌트 (페이지번호.. 1~??).. 끝페이지 번호는 데이터의 개수에 따라 변경.. 
+- 페이지 번호 계산.. (데이터 전체 개수(JSON배열의 길이.), 페이지당 데이터 개수(this.state.postperpage) )
+- 정보들을 pagination컴포넌트로 넘김.. 
+- 페이지네이션 박스 및 번호를 넣기위한 배열 생성후 첫번째 인덱스부터 마지막 인덱스까지 push로 넣어줌.. 
+- 매핑을 통해서 onclick(현재 페이지 설정_추후에 생성) 기능이 있는 span태그 생성.. 
+- 해당 페이지네이션 박스를 위한 css .page 생성.. 
+- 데이터 개수를 변화시켜 제대로 동작하는지 확인.. 
+- setCurrentpage 생성.. 페이지 누르면 누른 페이지 번호가 떠야함.. 그렇기 때문에 this.setcurrentpage(data)형으로 
+- 단 this.setcurrentpage(data) 로 해버리면 자동 실행이 되므로 ()=>this.setcurrentpage(data) 바로 반환하는 형태로 바꾸어서 
+생성.  함수 호출 vs 함수 전달 개념.. 
+- 클릭한 페이지 번호를 메인으로 넘겨서 그 넘긴 페이지 번호를 이용해 배열을 slice (ex. slice(0,3) > 0,1,2)내장함수를 활용해 출력되게 함.. 
 
-https://cheonmro.github.io/2018/09/04/event-object/ 
-https://blog.sonim1.com/152
-이벤트 객체
+4. app.js 현재페이지정보, 현재페이지 설정함수 만들기.. 
 
+5. 페이지네이션에서 페이지 번호 클릭시 그 페이지 번호 app.js로 넘김.  
 
-페이지네이션
+6. app.js 가 넘겨받은 페이지 번호를 setstate를 통해 현재 페이지로 설정.. 
+- postlist 컴포넌트에 currentpostlist 함수 적용.. postlist={this.state.currentpostlist}
+- currentpage 함수 동작수순 정리.. 
 
-1. post 개별 리스트 자료를 나타낸 목록
-
-2. posts 포스트들을 mapping 시키는 js
-
-3. 전체 동작을 나타내는 페이지네이션.. 
-
-4. 메인에서 데이터로 사용할 배열 생성 
-
-5. postList 컴포넌트에서 매핑시키기 키값 주기!
-
-6. 부모요소에서 배열에 있는 프로퍼티값(ex id title author...) 가져오기 at post 컴포넌트 
-
-7. 각 컴포넌트에 대해 css 작업  App, pagiNation, Post, PostList
-
-8. 각 페이지마다 지정된 포스트만 남기기 위해서 postPerPage 프로퍼티를 state에 추가 
-그리고 PagiNation에 totalLength, postsPerPage, currentPage, setCurrentPage 추가 .. 할당할 변수는 
-순서대로 postList.length, postsPerPage, currentPage, setCurrentPage.. 
-
-9. pagiNation에서 길이에 맞춰 하단의 페이지네이션 상자에 번호를 나타내기 위해서 render내부에서 순서대로 번호 삽입..  props를 통해 수치 가져오기.. 
-
-10, 하단 페이지네이션 박스에 클릭이벤트 부여 (setCurrentPage)... this.setCureentPage(data) 함수를 바로 클릭이벤트로 넣어주면 이벤트를 넣었을 때 바로호출이 되어버림.. 현재페이지 설정.. 
-
-11. 메인에서 이제 현재페이지 설정을 위해서 state에 currentPage 추가 및 하단 pageNation 컴포넌트에도 currentPage 설정.. 
-현재 페이지 번호로 설정함.. 
-
-12. PostList 컴포넌트에서 이제 전체 페이지 중 지정된 숫자만큼 끊어서 표시할 수 있도록 slice를 활용한 함수를 생성. 
 
 
 코드 
-App.js
+app.js
 
 import './App.css';
+import { Component } from 'react';
 import PostList from './components/PostList.js';
 import PagiNation from './components/PagiNation.js';
-import React,{Component} from 'react';
 
-class App extends Component{
+class App extends Component {
+
   constructor(props){
     super(props)
     this.state={
-      postList:[
-        {id:10,title:'Post10',author:'이민호',writeDate:'2022-12-20',hits:10},
-        {id:9,title:'Post9',author:'정채연',writeDate:'2022-11-20',hits:10},
-        {id:8,title:'Post8',author:'송중기',writeDate:'2022-10-20',hits:10},
-        {id:7,title:'Post7',author:'안철수',writeDate:'2022-09-20',hits:10},
-        {id:6,title:'Post6',author:'홍준표',writeDate:'2022-08-20',hits:10},
-        {id:5,title:'Post5',author:'문재인',writeDate:'2022-07-20',hits:10},
-        {id:4,title:'Post4',author:'박근혜',writeDate:'2022-06-20',hits:10},
-        {id:3,title:'Post3',author:'윤석열',writeDate:'2022-05-20',hits:10},
-        {id:2,title:'Post2',author:'옥희종',writeDate:'2022-04-20',hits:10},
-        {id:1,title:'Post1',author:'이동준',writeDate:'2022-03-20',hits:10},
-      ],
-      postsPerPage:3,
-      currentPage:1
+        postList:[
+          {no:10,title:'title-10', contents:'contents-10',author:'kim10' , writedate:'2022-08-30'},
+          {no:9,title:'title-9', contents:'contents-9', author:'kim9' , writedate:'2022-08-30'},
+          {no:8,title:'title-8', contents:'contents-8', author:'kim8' , writedate:'2022-08-30'},
+          {no:7,title:'title-7', contents:'contents-7', author:'kim7' , writedate:'2022-08-30'},
+          {no:6,title:'title-6', contents:'contents-6', author:'kim6' , writedate:'2022-08-30'},
+          {no:5,title:'title-5', contents:'contents-5', author:'kim5' , writedate:'2022-08-30'},
+          {no:4,title:'title-4', contents:'contents-4', author:'kim4' , writedate:'2022-08-30'},
+          {no:3,title:'title-3', contents:'contents-3', author:'kim3' , writedate:'2022-08-30'},
+          {no:2,title:'title-2', contents:'contents-2', author:'kim2' , writedate:'2022-08-30'},
+          {no:1,title:'title-1', contents:'contents-1', author:'kim1' , writedate:'2022-08-30'}        ],
+        postListPerPage:3,
+        currentPage:1
     }
   }
 
   setCurrentPage=(page)=>{
-    alert('App의 페이지번호 설정 함수 실행!')
-    alert(page+"로 페이지 변경!")
+    alert("페이지설정(App.js):"+page)
     this.setState({
       currentPage:page
     })
+    //PagiNation컴포넌트에서 클릭된 
+    //페이지번호를 넘겨받아서
+    //현재 페이지 번호로 설정한다.
   }
 
-  currentPosts=(totalPosts)=>{
-    const indexOfFirst=(this.state.currentPage-1)*this.state.postsPerPage
-    const indexOfLast=indexOfFirst+this.state.postsPerPage
-    const slicePosts=totalPosts.slice(indexOfFirst,indexOfLast)
-    //indexOfFirst부터 ~ indexOfLast까지 배열 일부분 추출
-    //totalPosts.slice(0,3)-1페이지 클릭시
-    //totalPosts배열 0번째부터 3번째 미만까지...
-    //배열 0,1,2번째 원소만 추출해서 리턴
-    //배열 0~2번째 부분만 추출해서 리턴
-
-    //totalPosts.slice(3,6)-2페이지 클릭시
-    //배열 3~5번째 부분만 추출해서 리턴
-
-    //totalPosts.slice(6,9)-3페이지 클릭시
-    //배열 6~8번째 부분만 추출해서 리턴
-    return slicePosts;
+  currentPostList=(postList)=>{
+    //slice 메서드 (배열 추출)
+    const {currentPage,postListPerPage}=this.state
+    //
+    const indexOfLast = currentPage*postListPerPage
+    const indexOfFirst = indexOfLast-postListPerPage
+    const slicePostList=postList.slice(indexOfFirst,indexOfLast)
+    return slicePostList;
   }
+  
 
   render(){
-    return(
-      <div id='App'>
-        <PostList postList={this.currentPosts(this.state.postList)}></PostList>
-        <PagiNation totalLength={this.state.postList.length}
-        postsPerPage={this.state.postsPerPage}
-        currentPage={this.state.currentPage}
-        setCurrentPage={this.setCurrentPage}></PagiNation>
+    const {postList,postListPerPage,currentPage}=this.state
+    return (
+      <div id='app'>
+          <PostList postList={this.currentPostList(postList)}/>
+          <PagiNation postListLength={postList.length}
+          postListPerPage={postListPerPage} 
+          currentPage={currentPage}
+          setCurrentPage={this.setCurrentPage}/>
       </div>
-    )
+    );
   }
 }
+
 export default App;
 
 
-App.css
+pagination.js
 
 
-#App{
-  width:1000px;
-  height:1000px;
-  background-color: aqua;
-  margin:0 auto;
-}
-
-PagiNation.js
-
-import React,{Component} from 'react';
 import '../css/PagiNation.css';
-import $ from 'jquery';
+import { Component } from 'react';
 
-class PagiNation extends Component{
+class PagiNation extends Component {
+
   constructor(props){
     super(props)
     this.state={
+      
     }
   }
 
-  pageClick=(page)=>{
-    alert("페이지 클릭!:"+page)
+  setCurrentPage=(page)=>{
+    //alert("페이지번호 클릭됨!")
+    alert(page+"페이지 클릭!")
     this.props.setCurrentPage(page)
-
-    //모든 페이지의 하이라이트 비활성화
-    //클래스이름이 모든 페이지에 공통으로 있으니까
-    //getElementsByClassName("page")
-    //0번째,1번째...
-    var AllPage=document.getElementsByClassName('page');
-    for(var i=0; i<AllPage.length; i++){
-      AllPage[i].style.color='black';
-      AllPage[i].style.backgroundColor='#777';
-    }
-    //특정 페이지를 클릭하면 하이라이트
-    var activePage=document.getElementById('page'+page);
-    activePage.style.color='#777';
-    activePage.style.backgroundColor='black';
+    //App.js의 setCurrentPage함수
   }
 
-  componentDidMount(){
-    //jquery 의 ready와 유사한 기능
-    //화면 다 만들어지고 나서 실행
-    //여기서 1페이지 활성화 시켜놓는것
-    //var activePage=document.getElementById('page1');
-    //activePage.style.color='#777';
-    //activePage.style.backgroundColor='black';
-    $("#page1").css({
-      color:'#777',
-      backgroundColor:'black'
-    })
+  prevPage=()=>{
+    const {currentPage,setCurrentPage} = this.props
+    if(currentPage === 1){
+      alert('이동불가!')
+      return 
+    }
+    else{
+      const prevPage = currentPage - 1 
+      setCurrentPage(prevPage)
+    }
   }
 
-  prevFunc=()=>{
-    alert("이전!")
-    const {currentPage,setCurrentPage}=this.props
-    //비구조화할당, 구조분해할당, destructuring assignment
-    //props의 currentPage를 왼쪽 currentPage에 할당
-    if(currentPage===1){
-      alert("이동불가!")
-      return
+  nextPage=()=>{
+    const {currentPage,setCurrentPage,postListLength,postListPerPage} = this.props
+    const endIndex = Math.ceil(postListLength/postListPerPage)
+    if( currentPage === endIndex){
+      alert('이동불가!')
+      return 
     }
-    const prevPage=currentPage-1
-    setCurrentPage(prevPage)
-  }
-
-  nextFunc=()=>{
-    alert("다음!")
-    const {currentPage,setCurrentPage,totalLength,postsPerPage}=this.props
-    //비구조화할당, 구조분해할당, destructuring assignment
-    const endPage=Math.ceil(totalLength/postsPerPage )//4
-    if(currentPage===endPage){
-      alert("이동불가!")
-      return//함수종료
+    else{
+      const nextPage = currentPage + 1
+      setCurrentPage(nextPage)
     }
-    const nextPage=currentPage+1
-    setCurrentPage(nextPage)
-    //App가 넘겨준 페이지 설정 함수
-    //거기다가 다음페이지 번호를 넘기면
-    //App의 currentPage가 바뀐다.
   }
 
   render(){
 
-    let pageNumbers=[];
-    const endPage=Math.ceil(this.props.totalLength/this.props.postsPerPage )
-    //10/3->3.33333 -> Math.ceil(3.3333) -> 4
-    for(let i=1; i<=endPage; i++){
-      pageNumbers.push(i)//[]->[1]->[1,2]->[1,2,3]->[1,2,3,4]
+    const {postListLength,postListPerPage}=this.props
+    //10,3
+    //3,3,3,1 - 1페이지~4페이지, 10/3 -> 3.33 -> 4
+    let pageNumbers=[];//페이지 번호가 들어갈 배열
+    console.log(postListLength)//10
+    console.log(postListPerPage)//3
+    const lastPageNum=Math.ceil(postListLength/postListPerPage)//4
+    for(var i=1; i<=lastPageNum; i++){//1~4
+      pageNumbers.push(i)//1,2,3,4
     }
     console.log(pageNumbers)//[1,2,3,4]
 
-    //pageNumbers배열이 넘긴 1,2,3,4가 page 들어가고 page를...
     const pageList=pageNumbers.map(
-      (page,index)=>(<span key={index} 
-        className="page" id={'page'+page} onClick={()=>this.pageClick(page)}>{page}</span>)
+      (data)=>(<span className='page' key={data}
+      onClick={()=>this.setCurrentPage(data)}>{data}</span>)
     )
-    //클래스이름은 공통디자인으로 사용하고,id는 구분용도
+    //this.setCurrentPage(data)
 
-    return(
+    return (  
       <div id='pagination'>
-        <a href="#" className='page' onClick={this.prevFunc}>&lt;</a>
-        {pageList}
-        <a href="#" className='page' onClick={this.nextFunc}>&gt;</a>
-        <div>
-          총 갯수:{this.props.totalLength}
-        </div>
-        <div>
-          페이지당 갯수:{this.props.postsPerPage}
-        </div>
+          <div>
+            총 글 갯수:{postListLength}
+          </div>
+          <div>
+            페이지당 글 갯수:{postListPerPage}
+          </div>
+          <div>
+            <button onClick={this.prevPage}>prev</button>
+            {pageList}
+            <button onClick={this.nextPage}>next</button>
+          </div>
       </div>
-    )
+    );
   }
 }
+
 export default PagiNation;
 
-
-PagiNation.css
-
-
-#pagination{
-    width:1000px;
-    height:200px;
-    background-color: brown;
-}
-
-.page{
-    display: inline-block;
-    width:35px;
-    height:35px;
-    border: 1px solid black;
-    background-color: #777;
-    text-align: center;
-    padding-top: 5px;
-    box-sizing: border-box;
-    margin:10px;
-    text-decoration: none;
-    color:black;
-    cursor: pointer;
-}
+post.js
 
 
-Post.js
-
-import React,{Component} from 'react';
 import '../css/Post.css';
+import { Component } from 'react';
 
-class Post extends Component{
+class Post extends Component {
+
   constructor(props){
     super(props)
     this.state={
+      
     }
   }
+
   render(){
-    return(
+    return (
       <div id='post'>
-        <span>{this.props.id}</span>
-        <span>{this.props.title}</span>
-        <span>{this.props.author}</span>
-        <span>{this.props.writeDate}</span>
-        <span>{this.props.hits}</span> 
+            <span>
+                {this.props.no}
+            </span>
+            <span>
+                {this.props.title}
+            </span>
+            <span>
+                {this.props.contents}
+            </span>
+            <span>
+                {this.props.author}
+            </span>
+            <span>
+                {this.props.writedate}
+            </span>
       </div>
-    )
+    );
   }
 }
+
 export default Post;
 
-
-Post.css
+post.css
 
 
 #post{
-    width:900px;
+    width:90%;
     height:50px;
     background-color: chartreuse;
-    margin:20px;
+    margin:10px;
 }
 
-#post>span:first-child{
-    float:left;
-    width:50px;
-    height:50px;
-    background-color: darkcyan;
-}
-#post>span:nth-child(2){
-    float:left;
-    width:200px;
-    height:50px;
-    background-color: darkgoldenrod;
-}
-#post>span:nth-child(3){
-    float:left;
-    width:100px;
-    height:50px;
-    background-color: darkgreen;
-}
-#post>span:nth-child(4){
-    float:left;
-    width:100px;
-    height:50px;
-    background-color: darkorange;
-}
-#post>span:nth-child(5){
-    float:left;
-    width:100px;
-    height:50px;
-    background-color: darkorchid;
+#post > span:first-child{
+    display: inline-block;
+    width: 10%;
+
+    background-color: aqua;
+    text-align: center;
 }
 
+#post > span:nth-child(2){
+    display: inline-block;
+    width: 20%;
 
-
-PostList.js
-
-import React,{Component} from 'react';
-import '../css/PostList.css';
-import Post from './Post.js';
-
-class PostList extends Component{
-  constructor(props){
-    super(props)
-    this.state={
-    }
-  }
-  render(){
-    const result=this.props.postList.map(
-      (data,index)=>
-      (<Post key={data.id + `${data.author}`} id={data.id} title={data.title}
-      author={data.author} writeDate={data.writeDate} hits={data.hits}
-      />)
-    )
-    return(
-      <div id='postList'>
-        {result}
-      </div>
-    )
-  }
+    background-color: brown;
+    text-align: center;
 }
-export default PostList;
 
+#post > span:nth-child(3){
+    display: inline-block;
+    width: 30%;
 
-PostList.css
-
-#postList{
-    width:1000px;
-    height:400px;
-    background-color: aquamarine;
+    background-color: green;
+    text-align: center;
 }
+
+#post > span:nth-child(4){
+    display: inline-block;
+    width: 10%;
+
+    background-color: purple;
+    text-align: center;
+}
+
+#post > span:last-child{
+    display: inline-block;
+    width: 30%;
+    background-color: yellow;
+    text-align: center;
+}
+
+pagination.css
+
+
+#pagination{
+    width:90%;
+    height:100px;
+    background-color: brown;
+}
+
+
+#pagination>div:first-child{
+    background-color: darkkhaki;
+}
+#pagination>div:nth-child(2){
+    background-color: darkmagenta;
+}
+#pagination>div:nth-child(3){
+    background-color: darkolivegreen;
+}
+
+.page{
+    display:inline-block;
+    width:35px;
+    height:35px;
+    border:1px solid black;
+    margin:5px;
+    text-align: center;
+    padding-top:5px;
+    box-sizing: border-box;
+    background-color: darkgray;
+}
+
+ 
