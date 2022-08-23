@@ -1,0 +1,384 @@
+app.js
+
+
+import './App.css';
+import PostList from './components/PostList.js';
+import PagiNation from './components/PagiNation.js';
+import React,{Component} from 'react';
+
+class App extends Component{
+  constructor(props){
+    super(props)
+    this.state={
+      postList:[
+        {id:10,img:'./img/육사오.jpg',name:'육사오',advance_rate:'20.5%',releaseDate:'2022-08-24',take:'392,022,871'},
+        {id:9,img:'./img/불릿트레인.jpg',name:'불릿 트레인',advance_rate:'19.0%',releaseDate:'2022-08-24',take:'439,389,526'},
+        {id:8,img:'./img/헌트.jpg',name:'헌트',advance_rate:'15.3%	',releaseDate:'2022-08-10',take:'303,388,291'},
+        {id:7,img:'./img/탑건-매버릭.jpg',name:'탑건:매버릭',advance_rate:'9.5%',releaseDate:'2022-06-22',take:'218,825,698'},
+        {id:6,img:'./img/한산-용의출현.jpg',name:'한산:용의출현',advance_rate:'6.1%	',releaseDate:'2022-07-27',take:'112,239,292'},
+        {id:5,img:'./img/놉.jpg',name:'놉',advance_rate:'5.9%',releaseDate:'2022-08-17',take:'142,497,558'},
+        {id:4,img:'./img/시멘틱에러.jpg',name:'시맨틱 에러:더 무비',advance_rate:'5.2%',releaseDate:'2022-08-31',take:'122,602,800'},
+        {id:3,img:'./img/할로윈의신부.jpg',name:'명탐정 코난:할로윈의 신부',advance_rate:'',releaseDate:'2022-07-13',take:'44,708,700'},
+        {id:2,img:'./img/코코순이.jpg',name:'코코순이',advance_rate:'2.2%',releaseDate:'2022-08-25',take:'32,311,700'},
+        {id:1,img:'./img/사랑할땐.jpg',name:'사랑할 땐 누구나 최악이 된다',advance_rate:'1.8%',releaseDate:'2022-08-25',take:'39,970,999'},
+      ],
+      postsPerPage:3,
+      currentPage:1
+    }
+  }
+
+  setCurrentPage=(page)=>{
+    alert('App의 페이지번호 설정 함수 실행!')
+    alert(page+"로 페이지 변경!")
+    this.setState({
+      currentPage:page
+    })
+  }
+
+  d
+  currentPosts=(totalPosts)=>{
+    const {currentPage,postsPerPage} = this.state
+    const indexOfFirst=(currentPage-1)*postsPerPage
+    const indexOfLast=indexOfFirst+postsPerPage
+    const slicePosts=totalPosts.slice(indexOfFirst,indexOfLast)
+    //indexOfFirst부터 ~ indexOfLast까지 배열 일부분 추출
+    //totalPosts.slice(0,3)-1페이지 클릭시
+    //totalPosts배열 0번째부터 3번째 미만까지...
+    //배열 0,1,2번째 원소만 추출해서 리턴
+    //배열 0~2번째 부분만 추출해서 리턴
+
+    //totalPosts.slice(3,6)-2페이지 클릭시
+    //배열 3~5번째 부분만 추출해서 리턴
+
+    //totalPosts.slice(6,9)-3페이지 클릭시
+    //배열 6~8번째 부분만 추출해서 리턴
+    return slicePosts;
+  }
+
+  render(){
+    return(
+      <div id='App'>
+        <PostList postList={this.currentPosts(this.state.postList)}></PostList>
+        <PagiNation totalLength={this.state.postList.length}
+        postsPerPage={this.state.postsPerPage}
+        currentPage={this.state.currentPage}
+        setCurrentPage={this.setCurrentPage}></PagiNation>
+      </div>
+    )
+  }
+}
+export default App;
+
+
+app.css
+
+
+#post{
+    width:700px;
+    height:100px;
+    background-color: chartreuse;
+    margin:20px;
+}
+
+#post>span{
+    height: 100px;
+    text-align: center;
+    line-height: 100px;
+}
+
+#post>span>img{
+    width: 100px;
+    height: 100px;
+}
+
+#post>span:first-child{
+    float:left;
+    width:50px;
+    background-color: darkcyan;
+}
+#post>span:nth-child(2){
+    float:left;
+    width:100px;
+    background-color: darkgoldenrod;
+}
+#post>span:nth-child(3){
+    float:left;
+    width:100px;
+    background-color: darkgreen;
+}
+#post>span:nth-child(4){
+    float:left;
+    width:100px;
+    background-color: darkorange;
+}
+#post>span:nth-child(5){
+    float:left;
+    width:100px;
+    background-color: darkorchid;
+}
+
+#post>span:last-child{
+    float: left;
+    width: 250px;
+    background-color: bisque;
+}
+
+
+PagiNation.js
+
+import React,{Component} from 'react';
+import '../css/PagiNation.css';
+import $ from 'jquery';
+
+class PagiNation extends Component{
+  constructor(props){
+    super(props)
+    this.state={
+    }
+  }
+
+  pageClick=(page)=>{
+    alert("페이지 클릭!:"+page)
+    this.props.setCurrentPage(page)
+
+    //모든 페이지의 하이라이트 비활성화
+    //클래스이름이 모든 페이지에 공통으로 있으니까
+    //getElementsByClassName("page")
+    //0번째,1번째...
+    var AllPage=document.getElementsByClassName('page');
+    for(var i=0; i<AllPage.length; i++){
+      AllPage[i].style.color='black';
+      AllPage[i].style.backgroundColor='#777';
+    }
+    //특정 페이지를 클릭하면 하이라이트
+    var activePage=document.getElementById('page'+page);
+    activePage.style.color='#777';
+    activePage.style.backgroundColor='black';
+  }
+
+  componentDidMount(){
+    //jquery 의 ready와 유사한 기능
+    //화면 다 만들어지고 나서 실행
+    //여기서 1페이지 활성화 시켜놓는것
+    //var activePage=document.getElementById('page1');
+    //activePage.style.color='#777';
+    //activePage.style.backgroundColor='black';
+    $("#page1").css({
+      color:'#777',
+      backgroundColor:'black'
+    })
+  }
+
+  prevFunc=()=>{
+    alert("이전!")
+    const {currentPage,setCurrentPage}=this.props
+    //비구조화할당, 구조분해할당, destructuring assignment
+    //props의 currentPage를 왼쪽 currentPage에 할당
+    if(currentPage===1){
+      alert("이동불가!")
+      return
+    }
+    const prevPage=currentPage-1
+    setCurrentPage(prevPage)
+  }
+
+  nextFunc=()=>{
+    alert("다음!")
+    const {currentPage,setCurrentPage,totalLength,postsPerPage}=this.props
+    //비구조화할당, 구조분해할당, destructuring assignment
+    const endPage=Math.ceil(totalLength/postsPerPage )//4
+    if(currentPage===endPage){
+      alert("이동불가!")
+      return//함수종료
+    }
+    const nextPage=currentPage+1
+    setCurrentPage(nextPage)
+    //App가 넘겨준 페이지 설정 함수
+    //거기다가 다음페이지 번호를 넘기면
+    //App의 currentPage가 바뀐다.
+  }
+
+  setCurrentPage=(page)=>{
+    alert('App의 페이지 번호 함수 실행!')
+    alert(page+'로 페이지 변경~')
+    this.props.setCurrentPage(page)//app의 함수 
+  }
+  
+  render(){
+
+    let pageNumbers=[];
+    const endPage=Math.ceil(this.props.totalLength/this.props.postsPerPage )
+    //10/3->3.33333 -> Math.ceil(3.3333) -> 4
+    for(let i=1; i<=endPage; i++){
+      pageNumbers.push(i)//[]->[1]->[1,2]->[1,2,3]->[1,2,3,4]
+    }
+    console.log(pageNumbers)//[1,2,3,4]
+
+    //pageNumbers배열이 넘긴 1,2,3,4가 page 들어가고 page를...
+    const pageList=pageNumbers.map(
+      (page,index)=>(<span key={index} 
+        className="page" id={'page'+page} onClick={()=>this.pageClick(page)}>{page}</span>)
+    )
+    //클래스이름은 공통디자인으로 사용하고,id는 구분용도
+
+    return(
+      <div id='pagination'>
+        <a href="#" className='page' onClick={this.prevFunc}>&lt;</a>
+        {pageList}
+        <a href="#" className='page' onClick={this.nextFunc}>&gt;</a>
+        <div>
+          총 갯수:{this.props.totalLength}
+        </div>
+        <div>
+          페이지당 갯수:{this.props.postsPerPage}
+        </div>
+      </div>
+    )
+  }
+}
+export default PagiNation;
+
+
+
+PagiNation.css
+
+
+#pagination{
+    width:1000px;
+    height:200px;
+    background-color: brown;
+}
+
+.page{
+    display: inline-block;
+    width:35px;
+    height:35px;
+    border: 1px solid black;
+    background-color: #777;
+    text-align: center;
+    padding-top: 5px;
+    box-sizing: border-box;
+    margin:10px;
+    text-decoration: none;
+    color:black;
+    cursor: pointer;
+}
+Post.js
+
+import React,{Component} from 'react';
+import '../css/Post.css';
+
+class Post extends Component{
+  constructor(props){
+    super(props)
+    this.state={
+    }
+  }
+  render(){
+    return(
+      <div id='post'>
+        <span>{this.props.id}</span>
+        <span><img src={this.props.img} alt="영화이미지" /></span>
+        <span>{this.props.name}</span>
+        <span>{this.props.advance_rate}</span>
+        <span>{this.props.releaseDate}</span> 
+        <span>{this.props.take}</span>
+      </div>
+    )
+  }
+}
+export default Post;
+
+
+Post.css
+
+
+
+#post{
+    width:900px;
+    height:100px;
+    background-color: chartreuse;
+    margin:20px;
+}
+
+#post>span{
+    height: 100px;
+    text-align: center;
+    line-height: 100px;
+}
+
+#post>span>img{
+    width: 100px;
+    height: 100px;
+}
+
+#post>span:first-child{
+    float:left;
+    width:50px;
+    background-color: darkcyan;
+}
+#post>span:nth-child(2){
+    float:left;
+    width:100px;
+    background-color: darkgoldenrod;
+}
+#post>span:nth-child(3){
+    float:left;
+    width:300px;
+    background-color: darkgreen;
+}
+#post>span:nth-child(4){
+    float:left;
+    width:100px;
+    background-color: darkorange;
+}
+#post>span:nth-child(5){
+    float:left;
+    width:100px;
+    background-color: darkorchid;
+}
+
+#post>span:last-child{
+    float: left;
+    width: 250px;
+    background-color: bisque;
+}
+
+
+
+PostList.js
+
+import React,{Component} from 'react';
+import '../css/PostList.css';
+import Post from './Post.js';
+
+class PostList extends Component{
+  constructor(props){
+    super(props)
+    this.state={
+    }
+  }
+  render(){
+    const result=this.props.postList.map(
+      (data)=>
+      (<Post key={data.id} id={data.id} img={data.img}
+      name={data.name} advance_rate={data.advance_rate} releaseDate={data.releaseDate} take={data.take}
+      />)
+    )
+    return(
+      <div id='postList'>
+        {result}
+      </div>
+    )
+  }
+}
+export default PostList;
+
+
+PostList.css
+
+#postList{
+    width:1000px;
+    height:400px;
+    background-color: aquamarine;
+}
