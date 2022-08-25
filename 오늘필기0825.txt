@@ -1,0 +1,188 @@
+queryString
+
+
+App.js
+
+
+import React,{Component} from 'react';
+import {BrowserRouter,Routes,Route} from 'react-router-dom';
+import Home from './components/Home.js';
+import Search from './components/Search.js';
+import InputComp from './components/InputComp.js'
+import "./App.css";
+
+class App extends Component{
+  constructor(props){
+    super(props)
+    this.state={
+
+    }
+  }
+
+  render(){
+    return(
+      <div id='top'>
+        <BrowserRouter>
+          <InputComp/>
+          <Routes>
+              <Route exact path='/' element={<Home/>}/>
+              <Route path='/search' element={<Search/>}/>
+          </Routes>
+        </BrowserRouter>
+      </div>
+    )
+  }
+}
+
+export default App;
+
+App.css
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#top{
+  width:1000px;
+  height:1000px;
+  background-color: chartreuse;
+}
+
+#tab{
+  width: 1000px;
+  height: 100px;
+  background-color: red;
+}
+
+Home.js
+
+
+import "../css/Home.css";
+
+function Home(){
+    return(
+        <div id='home'>
+            홈
+        </div>
+    )
+}
+
+export default Home;
+
+Home.css
+
+
+#home{
+    width:1000px;
+    height:300px;
+    background-color: aquamarine;
+}
+
+
+Search.js
+
+import React, { Component } from 'react';
+import  queryString from 'query-string' // queryString 객체를 query-string 모듈에서 가져옴.. 
+
+class Search extends Component {
+    constructor(){
+        super()
+        this.state={}
+    }
+
+    componentDidMount(){
+        //초기화작업,네트워크를 통한 데이터 요청, 서버에 데이터요청
+        //네이버 API: naver.api.com/movie.json?query='스파이더맨'
+        console.log('Search')
+        console.log('window.location.location',window.location)
+        console.log('window.location.location.href',window.location.href)
+        console.log('window.location.search',window.location.search)
+        const queryObj = queryString.parse(window.location.search)
+        console.log(queryObj)
+        console.log(queryObj.inputValue)
+        //파싱해서 search 안에 검색어만 뽑아내기.. 
+        //검색어를 알아냈다.. 그 검색어로 네이버 검색 api에 요청 보내서 데이터 받아와서 state에 저장.. 
+        //여기서 페이지네이션 다 되도록 작업.. 
+        //http://www.naver.api.com/search/movie.json?query=inputValue//api 명령어.. 끝에 정의한 
+    }
+    render() {
+        return (
+            <div id='search'>
+                서치
+            </div>
+        );
+    }
+}
+
+export default Search;
+
+Search.css
+
+#search{
+    width:500px;
+    height:500px;
+    background-color: burlywood;
+}
+
+InputComp.js
+
+import React, { Component } from 'react';
+import '../css/inputComp.css'
+
+class InputComp extends Component {
+    constructor(props){
+        super(props)
+        this.state={
+            inputValue:''
+        }
+    }
+
+
+    inputChange=(e)=>{
+        this.setState=({
+            inputValue:e.target.value
+        })
+    }
+
+    searchBook=(e)=>{
+        alert('책검색!')
+        this.inputChange(e)
+        window.location.href=`/search?inputValue=${this.state.inputValue}&display=10&country=JPN` // ?이후는 querystring ..api에 주는 명령어 형식..  
+    }
+
+    render() {
+        return (
+            <div id="inputComp">
+              <input type="text" onChange={this.inputChange} placeholder='검색어'/>
+              <button onClick={this.searchBook}>검색</button>
+            </div>
+        );
+    }
+}
+
+export default InputComp;
+
+InputComp.css
+
+#inputComp{
+    width: 1000px;
+    height: 50px;
+    background-color: blanchedalmond;
+    text-align: center;
+}
+
+input {
+    width: 400px;
+    height: 40px;
+}
+
+button{
+    width: 50px;
+    height: 40px;
+}
+
+ref: https://velog.io/@kwonh/React-react-router-dom-%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0
+ref: https://bloodstrawberry.tistory.com/569
+ref: 
